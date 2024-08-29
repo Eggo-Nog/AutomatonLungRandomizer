@@ -71,8 +71,6 @@ std::map<std::string, std::string> levelMap = {
 	{"AtlantisMainRoom", "level70"}
 }; 
 
-
-
 // This should be filled dynamically according to flags, but I'm putting it here since this version doesn't do that yet
 // Comments indicate string length changes (for easily placing new warps in the correct location)
 // It is important for logic reasons that this is sorted by string length in descending order
@@ -208,12 +206,11 @@ int randomizeWeapons(int mode, int seed){
 	std::vector<int> wepList{1, 2, 3, 4}; 
 	
 	if (mode == 1) {
-		std::random_device rd;
-		std::mt19937 g(seed);//rd()
+		std::mt19937 g(seed);
 		std::shuffle(wepList.begin(), wepList.end(), g);
 	}
 
-	if (mode == 1 || mode == 2) {
+	if (mode == 1 || mode == 0) {
 		std::fstream w2File, w3File, w4File, w5File;
 		
 		// Overwrite Weapon 2
@@ -309,6 +306,9 @@ std::array<FileWarp, WARP_COUNT> generateGameLayout(std::array<FileWarp, WARP_CO
 		// The use of std::find itself could also be improved since it uses linear search, which is slow
 		if (std::find(blacklist.begin(), blacklist.end(), f[queuedWarps[i]].destination.level) != blacklist.end()) removeWarp = true;
 		
+		// Temporary way to stop the beetle warp in CollectibleTrackerEntrance from getting overwritten
+		if (f[queuedWarps[i]].parentLevel == "CollectibleTrackerEntrance" && f[queuedWarps[i]].destination.level == "BeetleFlightTest") removeWarp = true;
+		
 		// Remove warp at i and decrement i (since the index doesn't need to move up)
 		if (removeWarp) {
 			queuedWarps.erase(queuedWarps.begin()+i);
@@ -320,7 +320,6 @@ std::array<FileWarp, WARP_COUNT> generateGameLayout(std::array<FileWarp, WARP_CO
 	// 3. Shuffle queuedWarps and assign warps in turn from the Warp Pool
 	
 	// Randomly shuffle queuedWarps
-	std::random_device rd;
 	std::mt19937 g(seed);
 	std::shuffle(queuedWarps.begin(), queuedWarps.end(), g);
 	
@@ -350,7 +349,7 @@ std::array<FileWarp, WARP_COUNT> generateGameLayout(std::array<FileWarp, WARP_CO
 		while (!goodSize) {
 			int n = f[queuedWarps[i]].destination.level.size();
 			int m = std::rand() % WARP_POOL_SIZE;
-			if (((n-1) + (4 - ((n-1)%4))) >= warpPool[m].level.size()) {
+			if (((n-1) + (4 - ((n-1)%4))) >= warpPool[m].level.size() && warpPool[m].level != f[queuedWarps[i]].parentLevel) {
 				goodSize = true;
 				f[queuedWarps[i]].destination = warpPool[m];
 			}
@@ -380,7 +379,7 @@ int makeBeetleFast(int mode){
 		bftFile.put((unsigned char) 112);
 		
 	}
-	if (mode == 1 || mode == 2) {
+	if (mode == 1 || mode == 0) {
 		if (!bftFile.good()) return -1;
 		bftFile.close();
 	}
