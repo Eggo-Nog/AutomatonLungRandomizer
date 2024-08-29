@@ -361,7 +361,7 @@ std::array<FileWarp, WARP_COUNT> generateGameLayout(std::array<FileWarp, WARP_CO
 }	
 
 int makeBeetleFast(int mode){
-	// 1 for speed, 2 for repair
+	// 1 for speed, 0 for repair
 	std::fstream bftFile;
 	if (mode == 1) {
 		
@@ -371,7 +371,7 @@ int makeBeetleFast(int mode){
 		bftFile.seekp(133910);
 		bftFile.put((unsigned char) 200);
 		
-	} else if (mode == 2) {
+	} else if (mode == 0) {
 		
 		bftFile.open(levelMap["BeetleFlightTest"]);
 		bftFile.seekp(133906);
