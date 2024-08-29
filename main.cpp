@@ -130,15 +130,20 @@ int main(int argc, char *argv[]) {
 	
 	// Only run if we're given a mode and a seed as cmd args
 	if (argc == 3) {
-		int mode = 0;
-		int uSeed = 0;
+		unsigned int mode = 0;
+		unsigned int uSeed = 0;
+		
 		try {
 			mode = std::stoi(argv[1]);
 			uSeed = std::stoi(argv[2]);
+			
 		} catch (std::invalid_argument const& ex) {
-			std::cout << "Invalid seed, defaulting to repairing game install\n";
-			mode = 0;
-			uSeed = 0;
+			std::cout << "Seed isn't a number, please try again without using any letters or symbols.\n";
+			return 0;
+			
+		} catch (std::out_of_range const& ex) {
+			std::cout << "Seed number is too large, try using a smaller number (something between 0-64000 should work for most machines).\n";
+			return 0;
 		}
 		
 		// Initialize rLayout
@@ -171,6 +176,7 @@ int main(int argc, char *argv[]) {
 			rLayout = stockWarps;
 		}
 		
+		// All of these functions return -1 when they encounter a file I/O error, so track if any do and relay this to the user
 		int bad = 0;
 		bad += randomizeWeapons(mode, uSeed);
 		std::cout << ".";
@@ -179,10 +185,11 @@ int main(int argc, char *argv[]) {
 		bad += writeAllFileWarps(rLayout);
 		
 		if (bad < 0) {
-			std::cout << "Some kind of error was encountered when trying to modify your game's files.\nYou can try to run the program again as administrator, or contact the randomizer developer for help.\nYou should also double check the README to make sure you're using the program correctly.\nIn the meantime, you can use Steam's \"Verify Integrity of Game File\'s\" option to repair your game.\n";
+			std::cout << "Some kind of error was encountered when trying to modify your game's files.\nYou can try to run the program again as administrator, or contact the randomizer developer for help.\nYou should also double check the README to make sure you're using the program correctly.\nIn the meantime, you can use Steam's \"Verify Integrity of Game File\'s\" option to repair your game install.\n";
 		}
-		
-		std::cout << "Done!\n";
+		else {
+			std::cout << "Done!\n";
+		}
 	}
 	
 	
